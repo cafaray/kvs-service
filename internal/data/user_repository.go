@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/cafaray/pkg/user"
+	"github.com/cafaray/kvs-service/pkg/user"
 )
 
 // UserRepository manages the operations with the database that correspond to the user model.
@@ -38,29 +38,23 @@ func (ur *UserRepository) GetOne(ctx context.Context, id uint) (user.User, error
         FROM users
 		WHERE id = $1;
 	`
-	row, err := ur.Data.DB.QueryRowContext(ctx, q, id)
-	if err != nil {
-		return user.User{}, err
-	}
+	row := ur.Data.DB.QueryRowContext(ctx, q, id)
 	var u user.User
-	err = row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Username, &u.Email, &u.Picture, &u.CreatedAt, &u.UpdatedAt)
+	err := row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Username, &u.Email, &u.Picture, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
 		return user.User{}, err
 	}
 	return u, nil
 }
-func (ur *UserRepository) GetByUserName(ctx context.Context, username string) (user.User, error) {
+func (ur *UserRepository) GetByUsername(ctx context.Context, username string) (user.User, error) {
 	q := `
 	SELECT id, first_name, last_name, username, email, picture, password, created_at, updated_at
         FROM users
 		WHERE username = $1;
 	`
-	row, err := ur.Data.DB.QueryRowContext(ctx, q, username)
-	if err != nil {
-		return user.User{}, err
-	}
+	row := ur.Data.DB.QueryRowContext(ctx, q, username)
 	var u user.User
-	err = row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Username, &u.Email, &u.Picture, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
+	err := row.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Username, &u.Email, &u.Picture, &u.PasswordHash, &u.CreatedAt, &u.UpdatedAt)
 	if err != nil {
 		return user.User{}, err
 	}

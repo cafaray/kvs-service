@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/cafaray/pkg/element"
+	"github.com/cafaray/kvs-service/pkg/element"
 )
 
 type ElementRepository struct {
@@ -42,19 +42,24 @@ func (er *ElementRepository) GetOne(ctx context.Context, id uint) (element.Eleme
 	}
 	return e, nil
 }
-func (er *ElementRepository) GetByUser(ctx context.Context, userID uint) (element.Element, error) {
+func (er *ElementRepository) GetByUser(ctx context.Context, userID uint) ([]element.Element, error) {
 	q := `
 	SELECT id, user_id, key, value, created_at, updated_at
 		FROM element
 		WHERE user_id = $1;
 	`
-	row := er.Data.DB.QueryRowContext(ctx, q, userID)
-	var e element.Element
-	err := row.Scan(&e.ID, &e.UserID, &e.Key, &e.Value, &e.CreatedAt, &e.UpdatedAt)
+	rows, err := er.Data.DB.QueryContext(ctx, q, userID)
 	if err != nil {
-		return element.Element{}, err
+		return nil, err
 	}
-	return e, nil
+	defer rows.Close()
+	var elems []element.Element
+	for rows.Next() {
+		var e element.Element
+		rows.Scan(&e.ID, &e.UserID, &e.Key, &e.Value, &e.CreatedAt, &e.UpdatedAt)
+		elems = append(elems, e)
+	}
+	return elems, nil
 }
 func (er *ElementRepository) Create(ctx context.Context, element *element.Element) error {
 	q := `

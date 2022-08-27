@@ -9,6 +9,6 @@ type Repository interface {
 	GetOne(ctx context.Context, id uint) (User, error)
 	GetByUsername(ctx context.Context, username string) (User, error)
 	Create(ctx context.Context, user *User) error
-	Upfate(ctx context.Context, id uint, user *User) error
+	Update(ctx context.Context, id uint, user *User) error
 	Delete(ctx context.Context, id uint) error
 }

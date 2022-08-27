@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cafaray/internal/data"
 	"github.com/go-chi/chi"
 )
 
@@ -15,6 +16,13 @@ type Server struct {
 // New inicialize a new server with configuration.
 func New(port string) (*Server, error) {
 	r := chi.NewRouter()
+
+	ur := &UserRouter{Repository: &data.UserRepository{Data: data.New()}}
+	er := &ElementRouter{Repository: &data.ElementRepository{Data: data.New()}}
+
+	r.Mount("/api/v1/users", ur.Routes())
+	r.Mount("/api/v1/elements", er.Routes())
+
 	serv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      r,
